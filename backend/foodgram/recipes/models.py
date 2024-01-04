@@ -56,7 +56,7 @@ class Recipe(models.Model):
     name = models.CharField('Название рецепта', max_length=200)
     text = models.TextField('Описание для рецепта', help_text='Введите описание блюда')
     cooking_time = models.PositiveIntegerField(
-        verbose_name='Время готовки'
+        verbose_name='Время готовки',
         validators=[MinValueValidator(
             1, message='Время готовки должно быть не менее минуты.'
         )]
