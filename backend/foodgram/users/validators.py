@@ -1,10 +1,9 @@
-from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 
-class SlugValidator(RegexValidator):
-    regex = '^[-a-zA-Z0-9_]+$'
-
-
-def min_amount(amount):
-    if amount <= 0:
-        raise ValueError('Введите количество больше 1.')
+def username_validator(value):
+    if value == 'me':
+        raise ValidationError(
+            'Никнейм "me" запрещён.'
+        )
+    return value
