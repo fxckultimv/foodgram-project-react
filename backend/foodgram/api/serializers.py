@@ -5,7 +5,7 @@ from drf_extra_fields.fields import Base64ImageField
 
 
 from users.models import Subscription, User
-from recipes.models import Tag
+from recipes.models import Tag, Ingredient
 
 
 class CustomUserSerializer(UserSerializer):
@@ -50,3 +50,10 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['id', 'name', 'color', 'slug']
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name', 'measurement_unit']
