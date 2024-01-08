@@ -5,7 +5,7 @@ from drf_extra_fields.fields import Base64ImageField
 
 
 from users.models import Subscription, User
-from recipes.models import Tag, Ingredient, RecipeIngredients
+from recipes.models import Tag, Ingredient, RecipeIngredients, Favorite, Cart
 
 
 class CustomUserSerializer(UserSerializer):
@@ -59,6 +59,57 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'measurement_unit']
 
 
+class RecipeSerializer(serializers.ModelSerializer):
+    """ Сериализатор просмотра модели Рецепт. """
+
+    tags = TagSerializer(many=True)
+    author = CustomUserSerializer(read_only=True)
+    ingredients = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField(
+        method_name='get_is_favorited')
+    is_in_shopping_cart = serializers.SerializerMethodField(
+        method_name='get_is_in_shopping_cart')
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        ]
+
+    def get_ingredients(self, obj):
+        ingredients = RecipeIngredients.objects.filter(recipe=obj)
+        
+        return RecipeIngredientSerializer(ingredients, many=True).data
+
+    def get_is_favorited(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        
+        return Favorite.objects.filter(
+            user=request.user, recipe_id=obj
+        ).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        
+        return Cart.objects.filter(
+            user=request.user, recipe_id=obj
+        ).exists()
+
+
+
 class RecipeIngredientSerializer(serializers.ModelSerializer):
 
     id = serializers.ReadOnlyField(source='ingredient.id')
@@ -70,3 +121,5 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeIngredients
         fields = ['id', 'name', 'amount', 'measurement_unit']
+
+
