@@ -155,3 +155,23 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         ]
+
+
+    def validation(self, data):
+        ingredients = self.initial_data.get('ingredients')
+        list = []
+        for ingredient in ingredients:
+            amount = ingredient['amount']
+            if int(amount) < 1:
+                raise serializers.ValidationError({
+                   'amount': 'Количество ингредиента должно быть больше 0!'
+                })
+            if ingredient['id'] in list:
+                raise serializers.ValidationError({
+                   'ingredient': 'Ингредиенты должны быть уникальными!'
+                })
+            list.append(ingredient['id'])
+        return data
+
+
+    
