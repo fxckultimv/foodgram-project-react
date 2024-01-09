@@ -17,7 +17,7 @@ from .pagination import CustomPagination
 from users.models import User, Subscription
 
 
-class TagViewSet(viewset.ReadOnlyModelViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
     queryset = Tag.objects.all()
     permission_classes = [AllowAny, ]
@@ -25,7 +25,7 @@ class TagViewSet(viewset.ReadOnlyModelViewSet):
     setializer_class = TagSerializer
 
 
-class IngredientViewSet(viewset.ReadOnlyModelViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = [AllowAny, ]
     filter_backends = [IngredientsFilter, ]
@@ -46,12 +46,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if self.request.method == 'GET':
             return RecipeSerializer
         return CreateRecipeSerializer
-    
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context.update({'request': self.request})
         return context
-    
+
 
 class SubscribeView(APIView):
     permission_classes = [IsAuthenticated, ]
@@ -65,14 +65,14 @@ class SubscribeView(APIView):
             data=data,
             context={'request': request}
         )
-        
+
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, 
+            return Response(serializer.data,
                             status=status.HTTP_201_CREATED)
-        
+
         return Response(status=status.HTTP_400_BAD_REQUEST)
-  
+
     def delete(self, request, id):
         author = get_object_or_404(User, id=id)
         if Subscription.objects.filter(
@@ -115,5 +115,3 @@ class FavoriteView(APIView):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
-
