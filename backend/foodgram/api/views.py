@@ -167,12 +167,12 @@ class CartViewSet(APIView):
 
 @api_view(['GET'])
 def download_shopping_cart(request):
-    ingredient_list = "Ваш список покупок:"
     ingredients = RecipeIngredients.objects.filter(
         recipe__shopping_cart__user=request.user
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
     ).annotate(amount=Sum('amount'))
+    ingredient_list = "Ваш список покупок:"
     for num, i in enumerate(ingredients):
         ingredient_list += (
             f"\n{i['ingredient__name']} - "
