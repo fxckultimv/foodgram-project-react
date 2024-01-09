@@ -218,4 +218,15 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return RecipeSerializer(instance, context={
             'request': self.context.get('request')
         }).data
-    
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Favorite
+        fields = ['user', 'recipe']
+
+    def representation(self, instance):
+        return -(instance.recipe, context={
+            'request': self.context.get('request')
+        }).data
