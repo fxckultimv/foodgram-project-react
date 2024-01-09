@@ -286,7 +286,7 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
         return Recipe.objects.filter(author=obj).count()
     
 
-    class SubscriptionSerializer(serializers.ModelSerializer):
+class SubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
