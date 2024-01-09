@@ -24,7 +24,6 @@ from users.models import User, Subscription
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-
     queryset = Tag.objects.all()
     permission_classes = [AllowAny, ]
     pagination_class = None
@@ -41,7 +40,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-
     queryset = Recipe.objects.all()
     permission_classes = [IsAdminOrReadOnly, ]
     filter_backends = [DjangoFilterBackend, ]
@@ -92,7 +90,6 @@ class SubscribeView(APIView):
 
 
 class FavoriteView(APIView):
-
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, ]
 
@@ -124,7 +121,6 @@ class FavoriteView(APIView):
 
 
 class ShowSubscriptionsViewSet(ListAPIView):
-
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, ]
 
@@ -139,7 +135,6 @@ class ShowSubscriptionsViewSet(ListAPIView):
 
 
 class CartViewSet(APIView):
-
     permission_classes = [IsAuthenticated, ]
 
     def post(self, request, id):
@@ -158,3 +153,34 @@ class CartViewSet(APIView):
                 return Response(
                     serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        recipe = get_object_or_404(Recipe, id=id)
+        if Cart.objects.filter(
+           user=request.user, recipe=recipe).exists():
+            Cart.objects.filter(
+                user=request.user, recipe=recipe
+            ).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def download_shopping_cart(request):
+    ingredient_list = "Ваш список покупок:"
+    ingredients = RecipeIngredients.objects.filter(
+        recipe__shopping_cart__user=request.user
+    ).values(
+        'ingredient__name', 'ingredient__measurement_unit'
+    ).annotate(amount=Sum('amount'))
+    for num, i in enumerate(ingredients):
+        ingredient_list += (
+            f"\n{i['ingredient__name']} - "
+            f"{i['amount']} {i['ingredient__measurement_unit']}"
+        )
+        if num < ingredients.count() - 1:
+            ingredient_list += ', '
+    file = 'shopping_list'
+    response = HttpResponse(ingredient_list, 'Content-Type: application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{file}.pdf"'
+    return response
