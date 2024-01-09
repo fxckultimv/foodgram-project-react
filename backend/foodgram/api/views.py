@@ -9,8 +9,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .filters import IngredientsFilter, RecipeFilter
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, CreateRecipeSerializer, SubscriptionSerializer
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, RecipeTag
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, CreateRecipeSerializer, SubscriptionSerializer, FavoriteSerializer
+from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, RecipeTag, Favorite
 from .permissions import IsAdminOrReadOnly
 from .pagination import CustomPagination
 
@@ -81,4 +81,26 @@ class SubscribeView(APIView):
             )
             subscribed.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+
+class FavoriteView(APIView):
+    
+    pagination_class = CustomPagination
+    permission_classes = [IsAuthenticated, ]
+    
+    def post(self, request, id):
+        data = {
+            'user': request.user.id,
+            'recipe': id
+        }
+        if not Favorite.objects.filter(
+           user=request.user, recipe__id=id).exists():
+            serializer = FavoriteSerializer(
+                data=data, context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
