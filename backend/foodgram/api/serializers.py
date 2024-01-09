@@ -249,3 +249,10 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         return ShowFavoriteSerializer(instance.recipe, context={
             'request': self.context.get('request')
         }).data
+    
+
+class ShowSubscriptionsSerializer(serializers.ModelSerializer):
+
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
