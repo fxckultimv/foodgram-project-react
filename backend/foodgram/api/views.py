@@ -33,6 +33,7 @@ class IngredientViewSet(viewset.ReadOnlyModelViewSet):
     pagination_class = None
     search_filter = ['^name', ]
 
+
 class RecipeViewSet(viewsets.ModelViewSet):
 
     queryset = Recipe.objects.all()
@@ -71,7 +72,7 @@ class SubscribeView(APIView):
                             status=status.HTTP_201_CREATED)
         
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+  
     def delete(self, request, id):
         author = get_object_or_404(User, id=id)
         if Subscription.objects.filter(
@@ -82,19 +83,19 @@ class SubscribeView(APIView):
             subscribed.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class FavoriteView(APIView):
-    
+
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticated, ]
-    
+
     def post(self, request, id):
         data = {
             'user': request.user.id,
             'recipe': id
         }
-        
+
         if not Favorite.objects.filter(
            user=request.user, recipe__id=id).exists():
             serializer = FavoriteSerializer(
@@ -114,3 +115,5 @@ class FavoriteView(APIView):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+

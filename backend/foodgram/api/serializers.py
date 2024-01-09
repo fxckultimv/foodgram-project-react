@@ -30,7 +30,7 @@ class CustomUserSerializer(UserSerializer):
         return Subscription.objects.filter(
             user=request.user, author=obj
         ).exists()
-    
+
 
 class CustomUserCreateSerializer(UserCreateSerializer):
 
@@ -60,7 +60,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """ Сериализатор просмотра модели Рецепт. """
 
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
@@ -72,7 +71,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        
+
         fields = [
             'id',
             'tags',
@@ -88,14 +87,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_ingredients(self, obj):
         ingredients = RecipeIngredients.objects.filter(recipe=obj)
-        
+
         return RecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        
+
         return Favorite.objects.filter(
             user=request.user, recipe_id=obj
         ).exists()
@@ -104,11 +103,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
-        
+
         return Cart.objects.filter(
             user=request.user, recipe_id=obj
         ).exists()
-
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -163,11 +161,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             amount = ingredient['amount']
             if int(amount) < 1:
                 raise serializers.ValidationError({
-                   'amount': 'Количество не может быть нулевым.'
+                    'amount': 'Количество не может быть нулевым.'
                 })
             if ingredient['id'] in list:
                 raise serializers.ValidationError({
-                   'ingredient': 'Этот ингредиент уже есть.'
+                    'ingredient': 'Этот ингредиент уже есть.'
                 })
             list.append(ingredient['id'])
         return data
@@ -191,7 +189,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(author=author, **validated_data)
         self.create_ingredient(ingredients, recipe)
         self.create_tag(tags, recipe)
-        
+
         return recipe
 
     def update(self, instance, validated_data):
@@ -210,11 +208,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         instance.cooking_time = validated_data.pop('cooking_time')
         instance.save()
-        
+
         return instance
 
     def representation(self, instance):
-        
+
         return RecipeSerializer(instance, context={
             'request': self.context.get('request')}).data
 
@@ -246,7 +244,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     def representation(self, instance):
         return ShowFavoriteSerializer(instance.recipe, context={
             'request': self.context.get('request')}).data
-    
+
 
 class ShowSubscriptionsSerializer(serializers.ModelSerializer):
 
@@ -267,24 +265,24 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
             return False
         return Subscription.objects.filter(
             user=request.user, author=obj).exists()
-    
+
     def get_recipes(self, obj):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        
+
         recipes = Recipe.objects.filter(author=obj)
         limit = request.query_params.get('recipes_limit')
-        
+
         if limit:
             recipes = recipes[:int(limit)]
 
         return ShowFavoriteSerializer(
             recipes, many=True, context={'request': request}).data
-    
+
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
-    
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
 
