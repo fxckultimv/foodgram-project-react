@@ -172,14 +172,14 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             list.append(ingredient['id'])
         return data
 
-    def create_ingredients(self, ingredients, recipe):
+    def create_ingredient(self, ingredients, recipe):
         for ingredient in ingredients:
             ingredient = Ingredient.objects.get(id=ingredient['id'])
             RecipeIngredients.objects.create(
                 ingredient=ingredient, recipe=recipe, amount=i['amount']
             )
 
-    def create_tags(self, tags, recipe):
+    def create_tag(self, tags, recipe):
         for tag in tags:
             RecipeTag.objects.create(recipe=recipe, tag=tag)
 
@@ -189,6 +189,33 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         author = self.context.get('request').user
         recipe = Recipe.objects.create(author=author, **validated_data)
-        self.create_ingredients(ingredients, recipe)
-        self.create_tags(tags, recipe)
+        self.create_ingredient(ingredients, recipe)
+        self.create_tag(tags, recipe)
+        
         return recipe
+
+    def update(self, instance, validated_data):
+
+        RecipeTag.objects.filter(recipe=instance).delete()
+        RecipeIngredients.objects.filter(recipe=instance).delete()
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        self.create_ingredient(ingredients, instance)
+        self.create_tag(tags, instance)
+        instance.name = validated_data.pop('name')
+        instance.text = validated_data.pop('text')
+
+        if validated_data.get('image'):
+            instance.image = validated_data.pop('image')
+
+        instance.cooking_time = validated_data.pop('cooking_time')
+        instance.save()
+        
+        return instance
+
+    def representation(self, instance):
+        
+        return RecipeSerializer(instance, context={
+            'request': self.context.get('request')
+        }).data
+    
