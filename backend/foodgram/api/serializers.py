@@ -256,3 +256,10 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'username',
+            'first_name', 'last_name', 'is_subscribed',
+            'recipes', 'recipes_count']
