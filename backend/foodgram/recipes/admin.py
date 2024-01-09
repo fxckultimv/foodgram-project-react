@@ -5,6 +5,7 @@ from .models import Ingredient, Recipe, Cart, Tag, Favorite
 
 EMPTY_MSG = 'пусто'
 
+
 class IngredientsInRow(admin.TubularInline):
     model = Recipe.ingredients.through
 
@@ -30,7 +31,7 @@ class RecipeAdmin(admin.ModelAdmin):
         if Favorite.objects.filter(recipe=obj).exists():
             return Favorite.objects.filter(recipe=obj).count()
         return 0
-    
+
 
 @admin.register(Cart)
 class ShoppingCartAdmin(admin.ModelAdmin):

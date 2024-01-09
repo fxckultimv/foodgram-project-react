@@ -11,11 +11,12 @@ from rest_framework.generics import ListAPIView
 
 from .filters import IngredientsFilter, RecipeFilter
 from .serializers import (TagSerializer, IngredientSerializer,
-                          RecipeSerializer,
+                          RecipeSerializer, ShoppingCartSerializer,
                           CreateRecipeSerializer, SubscriptionSerializer,
                           FavoriteSerializer, ShowSubscriptionsSerializer)
+
 from recipes.models import (Tag, Ingredient, Recipe,
-                            RecipeIngredients, RecipeTag, Favorite)
+                            RecipeIngredients, RecipeTag, Favorite, Cart)
 from .permissions import IsAdminOrReadOnly
 from .pagination import CustomPagination
 
@@ -135,3 +136,25 @@ class ShowSubscriptionsViewSet(ListAPIView):
             page, many=True, context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
+
+
+class CartViewSet(APIView):
+
+    permission_classes = [IsAuthenticated, ]
+
+    def post(self, request, id):
+        data = {
+            'user': request.user.id,
+            'recipe': id
+        }
+        recipe = get_object_or_404(Recipe, id=id)
+        if not Cart.objects.filter(
+           user=request.user, recipe=recipe).exists():
+            serializer = ShoppingCartSerializer(
+                data=data, context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
