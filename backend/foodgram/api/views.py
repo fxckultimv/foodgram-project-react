@@ -14,6 +14,8 @@ from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, RecipeTag
 from .permissions import IsAdminOrReadOnly
 from .pagination import CustomPagination
 
+from users.models import User, Subscription
+
 
 class TagViewSet(viewset.ReadOnlyModelViewSet):
 
@@ -68,4 +70,15 @@ class SubscribeView(APIView):
             return Response(serializer.data, 
                             status=status.HTTP_201_CREATED)
         
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, id):
+        author = get_object_or_404(User, id=id)
+        if Subscription.objects.filter(
+           user=request.user, author=author).exists():
+            subscribed = get_object_or_404(
+                Subscription, user=request.user, author=author
+            )
+            subscribed.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
