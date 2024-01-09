@@ -5,7 +5,7 @@ from drf_extra_fields.fields import Base64ImageField
 
 
 from users.models import Subscription, User
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, Favorite, Cart
+from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, Favorite, Cart, RecipeTag
 
 
 class CustomUserSerializer(UserSerializer):
@@ -156,7 +156,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'cooking_time'
         ]
 
-
     def validation(self, data):
         ingredients = self.initial_data.get('ingredients')
         list = []
@@ -164,14 +163,32 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             amount = ingredient['amount']
             if int(amount) < 1:
                 raise serializers.ValidationError({
-                   'amount': 'Количество ингредиента должно быть больше 0!'
+                   'amount': 'Количество не может быть 0.'
                 })
             if ingredient['id'] in list:
                 raise serializers.ValidationError({
-                   'ingredient': 'Ингредиенты должны быть уникальными!'
+                   'ingredient': 'Этот ингредиент уже есть.'
                 })
             list.append(ingredient['id'])
         return data
 
+    def create_ingredients(self, ingredients, recipe):
+        for ingredient in ingredients:
+            ingredient = Ingredient.objects.get(id=ingredient['id'])
+            RecipeIngredients.objects.create(
+                ingredient=ingredient, recipe=recipe, amount=i['amount']
+            )
 
-    
+    def create_tags(self, tags, recipe):
+        for tag in tags:
+            RecipeTag.objects.create(recipe=recipe, tag=tag)
+
+    def create(self, validated_data):
+
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        author = self.context.get('request').user
+        recipe = Recipe.objects.create(author=author, **validated_data)
+        self.create_ingredients(ingredients, recipe)
+        self.create_tags(tags, recipe)
+        return recipe
