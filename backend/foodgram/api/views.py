@@ -5,7 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from .filters import IngredientsFilter
 from .serializers import TagSerializer, IngredientSerializer
-from recipes.models import Tag, Ingredient
+from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, RecipeTag
 
 
 class TagViewSet(viewset.ReadOnlyModelViewSet):
@@ -23,3 +23,12 @@ class IngredientViewSet(viewset.ReadOnlyModelViewSet):
     serializer_class = IngredientsFilter
     pagination_class = None
     search_filter = ['^name', ]
+
+class RecipeViewSet(viewsets.ModelViewSet):
+
+    queryset = Recipe.objects.all()
+    permission_classes = [AllowAny, ]
+    filter_backends = []
+    serializer_class = #
+    pagination_class = None
+    search_fields = ['^name', ]
