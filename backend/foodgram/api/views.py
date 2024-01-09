@@ -7,10 +7,15 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 
 from .filters import IngredientsFilter, RecipeFilter
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer, CreateRecipeSerializer, SubscriptionSerializer, FavoriteSerializer
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, RecipeTag, Favorite
+from .serializers import (TagSerializer, IngredientSerializer,
+                          RecipeSerializer,
+                          CreateRecipeSerializer, SubscriptionSerializer,
+                          FavoriteSerializer, ShowSubscriptionsSerializer)
+from recipes.models import (Tag, Ingredient, Recipe,
+                            RecipeIngredients, RecipeTag, Favorite)
 from .permissions import IsAdminOrReadOnly
 from .pagination import CustomPagination
 
@@ -22,14 +27,14 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     permission_classes = [AllowAny, ]
     pagination_class = None
-    setializer_class = TagSerializer
+    serializer_class = TagSerializer
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = [AllowAny, ]
     filter_backends = [IngredientsFilter, ]
-    serializer_class = IngredientsFilter
+    serializer_class = IngredientSerializer
     pagination_class = None
     search_filter = ['^name', ]
 
@@ -115,3 +120,18 @@ class FavoriteView(APIView):
 
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class ShowSubscriptionsViewSet(ListAPIView):
+
+    pagination_class = CustomPagination
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request):
+        user = request.user
+        queryset = User.objects.filter(author__user=user)
+        page = self.paginate_queryset(queryset)
+        serializer = ShowSubscriptionsSerializer(
+            page, many=True, context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
