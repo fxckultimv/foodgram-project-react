@@ -163,7 +163,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             amount = ingredient['amount']
             if int(amount) < 1:
                 raise serializers.ValidationError({
-                   'amount': 'Количество не может быть 0.'
+                   'amount': 'Количество не может быть нулевым.'
                 })
             if ingredient['id'] in list:
                 raise serializers.ValidationError({
@@ -216,8 +216,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def representation(self, instance):
         
         return RecipeSerializer(instance, context={
-            'request': self.context.get('request')
-        }).data
+            'request': self.context.get('request')}).data
 
 
 class ShowFavoriteSerializer(serializers.ModelSerializer):
@@ -235,8 +234,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     def representation(self, instance):
         return ShowFavoriteSerializer(instance.recipe, context={
-            'request': self.context.get('request')
-        }).data
+            'request': self.context.get('request')}).data
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
@@ -247,8 +245,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
     def representation(self, instance):
         return ShowFavoriteSerializer(instance.recipe, context={
-            'request': self.context.get('request')
-        }).data
+            'request': self.context.get('request')}).data
     
 
 class ShowSubscriptionsSerializer(serializers.ModelSerializer):
@@ -284,3 +281,23 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
 
         return ShowFavoriteSerializer(
             recipes, many=True, context={'request': request}).data
+    
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(author=obj).count()
+    
+
+    class SubscriptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Subscription
+        fields = ['user', 'author']
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subscription.objects.all(),
+                fields=['user', 'author'],
+            )
+        ]
+
+    def representation(self, instance):
+        return ShowSubscriptionsSerializer(instance.author, context={
+            'request': self.context.get('request')}).data
