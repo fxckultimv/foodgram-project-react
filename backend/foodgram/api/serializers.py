@@ -5,7 +5,8 @@ from drf_extra_fields.fields import Base64ImageField
 
 
 from users.models import Subscription, User
-from recipes.models import Tag, Ingredient, Recipe, RecipeIngredients, Favorite, Cart, RecipeTag
+from recipes.models import (Tag, Ingredient, Recipe,
+                            RecipeIngredients, Favorite, Cart, RecipeTag)
 
 
 class CustomUserSerializer(UserSerializer):

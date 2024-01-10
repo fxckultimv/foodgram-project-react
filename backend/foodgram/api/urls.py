@@ -3,10 +3,11 @@ from django.urls import path, include
 
 from .views import (TagViewSet, IngredientViewSet, RecipeViewSet,
                     CartViewSet, ShowSubscriptionsViewSet, FavoriteView,
-                    SubscribeView, TagViewSet, download_shopping_cart)
+                    SubscribeView, TagViewSet, download_cart)
+
+app_name = 'api'
 
 router = DefaultRouter()
-
 router.register('tags', TagViewSet, basename='tags')
 router.register('ingredients', IngredientViewSet, basename='ingredients')
 router.register('recipes', RecipeViewSet, basename='recipes')
@@ -14,7 +15,7 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 urlpatterns = [
     path(
         'recipes/download_shopping_cart/',
-        download_shopping_cart,
+        download_cart,
         name='download_shopping_cart'
     ),
     path(
@@ -37,7 +38,7 @@ urlpatterns = [
         SubscribeView.as_view(),
         name='subscribe'
     ),
-    
+
     path('auth/', include('djoser.urls.authtoken')),
     path('', include('djoser.urls')),
     path('', include(router.urls)),

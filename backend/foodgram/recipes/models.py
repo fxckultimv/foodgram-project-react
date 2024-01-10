@@ -27,7 +27,7 @@ class Ingredient(models.Model):
         ordering = ['name']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        constraints = [UniqueConstraint(fields=['name', 'measuring'], name='ingredient_name_unit_unique')]
+        constraints = [UniqueConstraint(fields=['name', 'measurement_unit'], name='ingredient_name_unit_unique')]
 
 
 class Recipe(models.Model):
@@ -86,7 +86,7 @@ class RecipeIngredients(models.Model):
         constraints = [
            UniqueConstraint(
                fields=['recipe', 'ingredient'],
-               name='recipeingredient_unique'
+               name='recipe_ingredient_unique'
            ) 
         ]
 
@@ -100,7 +100,7 @@ class RecipeTag(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=['recipe', 'tag'],
-                name='recipetag_unique'
+                name='recipe_tag_unique'
             )
         ]
 
@@ -115,7 +115,7 @@ class Favorite(models.Model):
         constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='userfavorite_unique'
+                name='user_favorite_unique'
             )
         ]
 

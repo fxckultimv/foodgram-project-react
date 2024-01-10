@@ -1,13 +1,7 @@
 from django.contrib import admin
-
 from .models import Ingredient, Recipe, Cart, Tag, Favorite
 
-
 EMPTY_MSG = 'пусто'
-
-
-class IngredientsInRow(admin.TubularInline):
-    model = Recipe.ingredients.through
 
 
 @admin.register(Ingredient)
@@ -15,6 +9,10 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'measuring']
     search_fields = ['name']
     empty_value_display = EMPTY_MSG
+
+
+class IngredientsInRow(admin.TubularInline):
+    model = Recipe.ingredients.through
 
 
 @admin.register(Recipe)

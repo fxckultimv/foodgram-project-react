@@ -6,14 +6,14 @@ from recipes.models import Recipe, Tag
 class RecipeFilter(filter.FilterSet):
     author = filter.CharFilter()
     tags = filter.ModelMultupleChoiceFilter(
-        field_name = 'tags__slug',
-        queryset = Tag.objects.all(),
-        label = 'Tags',
-        to_field_name = 'slug'
+        field_name='tags__slug',
+        queryset=Tag.objects.all(),
+        label='Tags',
+        to_field_name='slug'
     )
     is_favorited = filter.BooleanFilter(method='get_favorite')
     is_in_shopping_cart = filter.BooleandFilter(
-        method = 'get_shopping_cart'
+        method='get_shopping_cart'
     )
 
     class Meta:

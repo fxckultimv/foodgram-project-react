@@ -166,7 +166,7 @@ class CartViewSet(APIView):
 
 
 @api_view(['GET'])
-def download_shopping_cart(request):
+def download_cart(request):
     ingredients = RecipeIngredients.objects.filter(
         recipe__shopping_cart__user=request.user
     ).values(
