@@ -49,10 +49,10 @@ jobs:
               tags: veuxveuxveux/foodgram_frontend:latest
 
   deploy:
-      runs-on: ubuntu-latest
-      needs: build_and_push_to_docker_hub
-      steps:
-      - name: Push docker image
+    runs-on: ubuntu-latest
+    needs: build_and_push_to_docker_hub
+    steps:
+      - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -60,32 +60,21 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull veuxveuxveux/foodgram_backend:latest
-            sudo docker pull veuxveuxveux/foodgram_frontend:latest
-            cd infra/
+            sudo docker pull ruzhova/backend:v1
+            sudo docker pull ruzhova/frontend:v1
             sudo docker-compose stop
             sudo docker-compose rm backend
             sudo docker-compose rm frontend
-      - name: Docker-compose up
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
-          script: |
-            cd infra/
-            sudo touch .env
+            touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
-            echo POSTGRES_DB=${{ secrets.DB_NAME }} >> .env
+            echo DB_NAME=${{ secrets.DB_NAME }} >> .env
             echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env
             echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
-            echo DEBUG=False >> .env
-            sudo docker-compose up -d --build
+            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            sudo docker-compose up -d
 
           
   send_message:
