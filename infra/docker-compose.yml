@@ -8,7 +8,7 @@ services:
       - ./.env
 
   backend:
-    image: veuxveuxveux/backend:v1
+    image: veuxveuxveux/backend:latest
     volumes:
       - ../static/:/app/static/
       - ../media/:/app/media/recipes/
@@ -19,7 +19,7 @@ services:
     restart: always
 
   frontend:
-    image: veuxveuxveux/frontend:v1
+    image: veuxveuxveux/frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
@@ -28,7 +28,7 @@ services:
   nginx:
     image: nginx:1.19.3
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - ../static/:/var/html/static/
       - ../media/:/var/html/media/recipes/
@@ -41,6 +41,6 @@ services:
     restart: always
 
 volumes:
-  postgres_data:
-  static_value:
-  media_value:
+  pg_data:
+  static:
+  media:
