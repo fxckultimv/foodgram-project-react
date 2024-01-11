@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from .models import Ingredient, Recipe, Cart, Tag, Favorite
 
 
@@ -9,7 +10,7 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = 'пусто'
 
 
-class IngredientsInRow(admin.TubularInline):
+class IngredientsInRow(admin.TabularInline):
     model = Recipe.ingredients.through
 
 
