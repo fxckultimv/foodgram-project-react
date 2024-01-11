@@ -24,13 +24,14 @@ class Tag(models.Model):
 class Ingredient(models.Model):
 
     name = models.CharField('Название ингредиента', max_length=200)
-    measuring = models.CharField('Единицы измерения', max_length=200)
+    measurement_unit = models.CharField('Единицы измерения', max_length=200)
 
     class Meta:
         ordering = ['name']
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        constraints = [UniqueConstraint(fields=['name', 'measurement_unit'], name='ingredient_name_unit_unique')]
+        constraints = [UniqueConstraint(fields=['name', 'measurement_unit'],
+                                        name='ingredient_name_unit_unique')]
 
 
 class Recipe(models.Model):
