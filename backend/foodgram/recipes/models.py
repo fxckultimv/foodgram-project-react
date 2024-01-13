@@ -98,10 +98,9 @@ class RecipeIngredients(models.Model):
 
     class Meta:
         constraints = [
-           UniqueConstraint(
-               fields=['recipe', 'ingredient'],
-               name='recipe_ingredient_unique'
-           )
+            UniqueConstraint(fields=['user', 'recipe'],
+                             name='user_favorite_unique'
+                             )
         ]
 
 
