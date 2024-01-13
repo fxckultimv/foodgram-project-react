@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='RecipeIngredient',
+            name='RecipeIngredients',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('amount', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Количество')),
@@ -64,13 +64,13 @@ class Migration(migrations.Migration):
             name='Tag',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=200, unique=True, verbose_name='Название тега')),
+                ('name', models.CharField(max_length=200, unique=True, verbose_name='Название тэга')),
                 ('color', models.CharField(max_length=7, unique=True, verbose_name='Цвет')),
                 ('slug', models.SlugField(max_length=200, unique=True, verbose_name='Slug')),
             ],
             options={
-                'verbose_name': 'Тег',
-                'verbose_name_plural': 'Теги',
+                'verbose_name': 'Тэг',
+                'verbose_name_plural': 'Тэги',
             },
         ),
         migrations.CreateModel(

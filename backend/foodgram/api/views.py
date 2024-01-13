@@ -16,7 +16,7 @@ from .serializers import (TagSerializer, IngredientSerializer,
                           FavoriteSerializer, ShowSubscriptionsSerializer)
 
 from recipes.models import (Tag, Ingredient, Recipe,
-                            RecipeIngredients, RecipeTag, Favorite, Cart)
+                            RecipeIngredients, RecipeTag, Favorite, ShoppingCart)
 from .permissions import IsAdminOrReadOnly
 from .pagination import CustomPagination
 
@@ -143,7 +143,7 @@ class CartViewSet(APIView):
             'recipe': id
         }
         recipe = get_object_or_404(Recipe, id=id)
-        if not Cart.objects.filter(
+        if not ShoppingCart.objects.filter(
            user=request.user, recipe=recipe).exists():
             serializer = ShoppingCartSerializer(
                 data=data, context={'request': request}
@@ -156,9 +156,9 @@ class CartViewSet(APIView):
 
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, id=id)
-        if Cart.objects.filter(
+        if ShoppingCart.objects.filter(
            user=request.user, recipe=recipe).exists():
-            Cart.objects.filter(
+            ShoppingCart.objects.filter(
                 user=request.user, recipe=recipe
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -168,19 +168,21 @@ class CartViewSet(APIView):
 @api_view(['GET'])
 def download_cart(request):
     ingredients = RecipeIngredients.objects.filter(
-        recipe__shopping_cart__user=request.user
-    ).values(
-        'ingredient__name', 'ingredient__measurement_unit'
-    ).annotate(amount=Sum('amount'))
-    ingredient_list = "Ваш список покупок:"
-    for num, i in enumerate(ingredients):
-        ingredient_list += (
-            f"\n{i['ingredient__name']} - "
-            f"{i['amount']} {i['ingredient__measurement_unit']}"
+        recipe__shopping_cart__user=request.user).values(
+        'ingredient__name', 'ingredient__measurement_unit').annotate(
+        amount=Sum('amount')
         )
-        if num < ingredients.count() - 1:
+    ingredient_list = "Ваш список покупок:"
+    for number, ingredient in enumerate(ingredients):
+        ingredient_list += (
+            f"\n{ingredient['ingredient__name']} - "
+            f"{ingredient['amount']} {ingredient['ingredient__measurement_unit']}"
+        )
+        if number < ingredients.count() - 1:
             ingredient_list += ', '
+    
+    response = HttpResponse(ingredient_list,
+                            'Content-Type: application/pdf')
     file = 'shopping_list'
-    response = HttpResponse(ingredient_list, 'Content-Type: application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{file}.pdf"'
     return response

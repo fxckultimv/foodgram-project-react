@@ -6,7 +6,7 @@ from drf_extra_fields.fields import Base64ImageField
 
 from users.models import Subscription, User
 from recipes.models import (Tag, Ingredient, Recipe,
-                            RecipeIngredients, Favorite, Cart, RecipeTag)
+                            RecipeIngredients, Favorite, ShoppingCart, RecipeTag)
 
 
 class CustomUserSerializer(UserSerializer):
@@ -107,7 +107,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if request is None or request.user.is_anonymous:
             return False
 
-        return Cart.objects.filter(
+        return ShoppingCart.objects.filter(
             user=request.user,
             recipe_id=obj
         ).exists()
@@ -175,11 +175,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredient(self, ingredients, recipe):
-        for ingredient in ingredients:
-            ingredient = Ingredient.objects.get(id=ingredient['id'])
+        for ingredient_ in ingredients:
+            ingredient = Ingredient.objects.get(id=ingredient_['id'])
             RecipeIngredients.objects.create(
                 ingredient=ingredient, recipe=recipe,
-                amount=ingredient['amount']
+                amount=ingredient_['amount']
             )
 
     def create_tag(self, tags, recipe):
@@ -243,7 +243,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 class ShoppingCartSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Cart
+        model = ShoppingCart
         fields = ['user', 'recipe']
 
     def representation(self, instance):

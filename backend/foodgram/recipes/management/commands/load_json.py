@@ -1,54 +1,34 @@
 import json
 
 from django.core.management.base import BaseCommand
-from recipes.models import Ingredient
+from recipes.models import Ingredient, Tag
 
 
 class Command(BaseCommand):
-    help = 'Download ingredients to database'
-
     def add_arguments(self, parser):
-        parser.add_argument(
-            'path', type=str, help='Select download file location'
-        )
+        parser.add_argument("--path",
+                            type=str, help="file path")
 
-    def handle(self, *args, **kwargs):
-        path = kwargs['path']
+    def handle(self, *args, **options):
+        file_path = options["path"]
 
-        try:
-            with open(path, encoding='utf-8') as file:
-                data = json.load(file)
-                obj = 0
-                for i in data:
-                    name = i['name']
-                    measurement_unit = i['measurement_unit']
-                    try:
-                        print(name, measurement_unit)
-                        ingredient, created = Ingredient.objects.get_or_create(
-                            name=name,
-                            measurement_unit=measurement_unit,
+        with open(file_path, encoding='utf-8') as f:
+            jsondata = json.load(f)
+            if 'color' in jsondata[0]:
+                for line in jsondata:
+                    if not Tag.objects.filter(
+                       slug=line['slug']).exists():
+                        Tag.objects.create(
+                            name=line['name'],
+                            color=line['color'],
+                            slug=line['slug'],
                         )
-                        if created:
-                            ingredient.save()
-                            self.stdout.write(
-                                self.style.SUCCESS(
-                                    f'Ингредиент {name} успешно сохранен.'
-                                )
-                            )
-                            obj += 1
-                        else:
-                            self.stderr.write(
-                                self.style.NOTICE(
-                                    f'Ингредиент {name} уже существует.'
-                                )
-                            )
-                    except Exception as error:
-                        self.stderr.write(self.style.WARNING(f'{error}'))
-                        raise Exception(error)
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f'Были успешно загружены {obj} ингредиентов из {len(data)}.'
-                    )
-                )
-        except FileNotFoundError as error:
-            self.stderr.write(self.style.WARNING(f'{error}'))
+            elif 'measurement_unit' in jsondata[0]:
+                for line in jsondata:
+                    if not Ingredient.objects.filter(
+                       name=line['name'],
+                       measurement_unit=line['measurement_unit']).exists():
+                        Ingredient.objects.create(
+                            name=line['name'],
+                            measurement_unit=line['measurement_unit']
+                        )

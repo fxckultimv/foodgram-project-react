@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ingredient, Recipe, Cart, Tag, Favorite
+from .models import Ingredient, Recipe, ShoppingCart, Tag, Favorite
 
 
 @admin.register(Ingredient)
@@ -30,7 +30,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return 0
 
 
-@admin.register(Cart)
+@admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'recipe']
     search_fields = ['user__username', 'user__email']

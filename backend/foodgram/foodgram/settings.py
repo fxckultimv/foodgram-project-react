@@ -10,9 +10,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', '')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default='False') == 'False'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(' ')
+
+CSRF_TRUSTED_ORIGINS = ['https://*.kommgramm.ru']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
