@@ -32,14 +32,14 @@ class Subscription(models.Model):
         related_name='follower',
         on_delete=models.CASCADE,
         verbose_name='подписчик'
-        )
-    
+    )
+
     author = models.ForeignKey(
-        User, 
+        User,
         related_name='author',
         on_delete=models.CASCADE,
         verbose_name='Автор'
-        )
+    )
 
     class Meta:
         constraints = [

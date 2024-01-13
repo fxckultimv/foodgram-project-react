@@ -7,6 +7,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from rest_framework.generics import ListAPIView
 
 from .filters import IngredientsFilter, RecipeFilter
@@ -16,10 +17,9 @@ from .serializers import (TagSerializer, IngredientSerializer,
                           FavoriteSerializer, ShowSubscriptionsSerializer)
 
 from recipes.models import (Tag, Ingredient, Recipe,
-                            RecipeIngredients, RecipeTag, Favorite, ShoppingCart)
+                            RecipeIngredients, Favorite, ShoppingCart)
 from .permissions import IsAdminOrReadOnly
 from .pagination import CustomPagination
-
 from users.models import User, Subscription
 
 
@@ -171,16 +171,16 @@ def download_cart(request):
         recipe__shopping_cart__user=request.user).values(
         'ingredient__name', 'ingredient__measurement_unit').annotate(
         amount=Sum('amount')
-        )
+    )
     ingredient_list = "Ваш список покупок:"
-    for number, ingredient in enumerate(ingredients):
+    for number, ingr in enumerate(ingredients):
         ingredient_list += (
-            f"\n{ingredient['ingredient__name']} - "
-            f"{ingredient['amount']} {ingredient['ingredient__measurement_unit']}"
+            f"\n{ingr['ingredient__name']} - "
+            f"{ingr['amount']} {ingr['ingredient__measurement_unit']}"
         )
         if number < ingredients.count() - 1:
             ingredient_list += ', '
-    
+
     response = HttpResponse(ingredient_list,
                             'Content-Type: application/pdf')
     file = 'shopping_list'

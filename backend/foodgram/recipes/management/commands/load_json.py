@@ -1,13 +1,13 @@
 import json
 
 from django.core.management.base import BaseCommand
+
 from recipes.models import Ingredient, Tag
 
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument("--path",
-                            type=str, help="file path")
+        parser.add_argument("--path", type=str, help="file path")
 
     def handle(self, *args, **options):
         file_path = options["path"]
@@ -20,8 +20,7 @@ class Command(BaseCommand):
                        slug=line['slug']).exists():
                         Tag.objects.create(
                             name=line['name'],
-                            color=line['color'],
-                            slug=line['slug'],
+                            color=line['color'], slug=line['slug'],
                         )
             elif 'measurement_unit' in jsondata[0]:
                 for line in jsondata:
