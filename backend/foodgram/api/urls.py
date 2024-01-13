@@ -3,7 +3,7 @@ from django.urls import path, include
 
 from .views import (TagViewSet, IngredientViewSet, RecipeViewSet,
                     CartViewSet, ShowSubscriptionsViewSet, FavoriteView,
-                    SubscribeView, TagViewSet, download_cart)
+                    SubscribeView, download_cart)
 
 app_name = 'api'
 

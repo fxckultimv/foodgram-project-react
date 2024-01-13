@@ -107,7 +107,8 @@ class RecipeIngredients(models.Model):
 
 class RecipeTag(models.Model):
 
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
                                verbose_name='Рецепт')
 
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE, verbose_name='Тэг')
@@ -123,7 +124,7 @@ class RecipeTag(models.Model):
 
 class Favorite(models.Model):
 
-    user = models.ForeignKey(User,  on_delete=models.CASCADE,
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
                              verbose_name='Пользователь',
                              related_name='favorites')
 
