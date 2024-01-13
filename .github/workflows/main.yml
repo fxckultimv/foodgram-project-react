@@ -40,13 +40,13 @@ jobs:
             with:
               context: ./backend/foodgram/
               push: true
-              tags: veuxveuxveux/foodgram_backend:latest
+              tags: veuxveuxveux/backend:latest
           - name: Push frontend
             uses: docker/build-push-action@v2 
             with:
               context: frontend/
               push: true
-              tags: veuxveuxveux/foodgram_frontend:latest
+              tags: veuxveuxveux/frontend:latest
 
   deploy:
     runs-on: ubuntu-latest
