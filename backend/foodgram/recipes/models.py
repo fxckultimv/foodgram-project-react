@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
-from django.core.validators import MinValueValidator
 
 User = get_user_model()
 
@@ -97,8 +97,7 @@ class RecipeIngredients(models.Model):
                                  validators=[MinValueValidator(1)])
 
     class Meta:
-        constraints = [
-           UniqueConstraint(
+        constraints = [UniqueConstraint(
                fields=['recipe', 'ingredient'],
                name='recipe_ingredient_unique'
            )
@@ -133,10 +132,9 @@ class Favorite(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='user_favorite_unique'
-            )
+            UniqueConstraint(fields=['user', 'recipe'],
+                             name='user_favorite_unique'
+                             )
         ]
 
 

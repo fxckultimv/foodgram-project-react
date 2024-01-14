@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import UniqueConstraint
 from django.db import models
+from django.db.models import UniqueConstraint
 
 from .validators import username_validator
 
