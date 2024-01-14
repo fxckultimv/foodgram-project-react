@@ -97,17 +97,10 @@ class RecipeIngredients(models.Model):
                                  validators=[MinValueValidator(1)])
 
     class Meta:
-<<<<<<< HEAD
         constraints = [UniqueConstraint(
                fields=['recipe', 'ingredient'],
                name='recipe_ingredient_unique'
            )
-=======
-        constraints = [
-            UniqueConstraint(fields=['user', 'recipe'],
-                             name='user_favorite_unique'
-                             )
->>>>>>> 99385bcba0d7c38472d8e68799c8bc2e5636e3e0
         ]
 
 
