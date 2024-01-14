@@ -88,10 +88,12 @@ class Recipe(models.Model):
 class RecipeIngredients(models.Model):
 
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
-                               verbose_name='Рецепт')
+                               verbose_name='Рецепт',
+                               related_name='ingredient_recipe')
 
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,
-                                   verbose_name='Ингредиент')
+                                   verbose_name='Ингредиент',
+                                   related_name='ingredient_recipe')
 
     amount = models.IntegerField('Количество',
                                  validators=[MinValueValidator(1)])

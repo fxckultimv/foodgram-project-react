@@ -54,11 +54,25 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'measurement_unit']
 
 
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
+    )
+
+    class Meta:
+        model = RecipeIngredients
+        fields = ['id', 'name', 'amount', 'measurement_unit']
+
+
 class RecipeSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = RecipeIngredientSerializer(many=True,
+                                             source='ingredient_recipe')
     is_favorited = serializers.SerializerMethodField(
         method_name='get_is_favorited')
     is_in_shopping_cart = serializers.SerializerMethodField(
@@ -105,19 +119,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             user=request.user,
             recipe_id=obj
         ).exists()
-
-
-class RecipeIngredientSerializer(serializers.ModelSerializer):
-
-    id = serializers.ReadOnlyField(source='ingredient.id')
-    name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(
-        source='ingredient.measurement_unit'
-    )
-
-    class Meta:
-        model = RecipeIngredients
-        fields = ['id', 'name', 'amount', 'measurement_unit']
 
 
 class AddIngredientRecipeSerializer(serializers.ModelSerializer):
