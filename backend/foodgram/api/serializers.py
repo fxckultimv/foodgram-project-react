@@ -1,12 +1,20 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredients,
-                            RecipeTag, ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredients,
+    RecipeTag,
+    ShoppingCart,
+    Tag,
+)
 from users.models import Subscription, User
-from utils import get_is_subscribed
+from utils import check_subscription
 
 
 class CustomUserSerializer(UserSerializer):
@@ -24,7 +32,8 @@ class CustomUserSerializer(UserSerializer):
             'is_subscribed'
         ]
 
-    get_is_subscribed()
+    def get_is_subscribed(self, obj):
+        return check_subscription(self, obj)
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -94,12 +103,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time'
         ]
 
-    def get_ingredients(self, obj):
-        ingredients = RecipeIngredients.objects.filter(recipe=obj)
-
-        return RecipeIngredientSerializer(ingredients,
-                                          many=True).data
-
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
@@ -155,23 +158,24 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def validation(self, data):
         ingredients = data['ingredients']
+        ingredient_list = []
         for ingredient in ingredients:
             amount = ingredient['amount']
             if int(amount) < 1:
                 raise serializers.ValidationError({
                     'amount': 'Количество не может быть нулевым.'
                 })
-            if ingredient['id'] in list:
+            if ingredient['id'] in ingredient_list:
                 raise serializers.ValidationError({
                     'ingredient': 'Этот ингредиент уже есть.'
                 })
-            list.append(ingredient['id'])
+            ingredient_list.append(ingredient['id'])
         return data
 
     def create_ingredient(self, ingredients, recipe):
         RecipeIngredients.objects.bulk_create(
             [RecipeIngredients(
-                ingredient=get_object_or_404(Ingredient, ingredient['id']),
+                ingredient_id=ingredient['id'],
                 recipe=recipe,
                 amount=ingredient['amount']
             ) for ingredient in ingredients]
@@ -195,20 +199,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
 
-        RecipeTag.objects.filter(recipe=instance).delete()
-        RecipeIngredients.objects.filter(recipe=instance).delete()
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
+        RecipeTag.objects.filter(recipe=instance).delete()
+        RecipeIngredients.objects.filter(recipe=instance).delete()
         self.create_ingredient(ingredients, instance)
         self.create_tag(tags, instance)
-        instance.name = validated_data.pop('name')
-        instance.text = validated_data.pop('text')
-
-        if validated_data.get('image'):
-            instance.image = validated_data.pop('image')
-
-        instance.cooking_time = validated_data.pop('cooking_time')
-        instance.save()
 
         return super().update(instance, validated_data)
 
@@ -260,7 +256,8 @@ class ShowSubscriptionsSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'is_subscribed',
             'recipes', 'recipes_count']
 
-    get_is_subscribed()
+    def get_is_subscribed(self, obj):
+        return check_subscription(self, obj)
 
     def get_recipes(self, obj):
         request = self.context.get('request')
