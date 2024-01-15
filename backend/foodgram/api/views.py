@@ -128,8 +128,8 @@ class CartViewSet(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def post(self, request, id):
-        return delete_shortcut(self, request, id,
-                               ShoppingCart, ShoppingCartSerializer)
+        return post_shortcut(self, request, id,
+                             ShoppingCart, ShoppingCartSerializer)
 
     def delete(self, request, id):
         return delete_shortcut(self, request, id, ShoppingCart)
