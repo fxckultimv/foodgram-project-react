@@ -130,7 +130,7 @@ class CartViewSet(APIView):
     def post(self, request, id):
         return delete_shortcut(self, request, id,
                                ShoppingCart, ShoppingCartSerializer)
-    
+
     def delete(self, request, id):
         return delete_shortcut(self, request, id, ShoppingCart)
 
