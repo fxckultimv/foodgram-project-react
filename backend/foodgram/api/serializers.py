@@ -13,7 +13,7 @@ from recipes.models import (
     Tag,
 )
 from users.models import Subscription, User
-from utils import check_subscription
+from api.utils import check_subscription
 
 
 class CustomUserSerializer(UserSerializer):
@@ -155,7 +155,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'cooking_time'
         ]
 
-    def validation(self, data):
+    def validate(self, data):
         ingredients = data['ingredients']
         ingredient_list = []
         for ingredient in ingredients:
@@ -226,6 +226,13 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ['user', 'recipe']
 
+    def validate(self, data):
+        if Favorite.objects.filter(user=data['user'],
+                                   recipe=data['recipe']).exists():
+            raise serializers.ValidationError(
+                'Вы уже добавили рецепт в избранное'
+            )
+
     def representation(self, instance):
         return ShowFavoriteSerializer(instance.recipe, context={
             'request': self.context.get('request')}).data
@@ -236,6 +243,13 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ['user', 'recipe']
+
+    def validate(self, data):
+        if ShoppingCart.objects.filter(user=data['user'],
+                                       recipe=data['recipe']).exists():
+            raise serializers.ValidationError(
+                'Вы уже добавили рецепт в корзину'
+            )
 
     def representation(self, instance):
         return ShowFavoriteSerializer(instance.recipe, context={
