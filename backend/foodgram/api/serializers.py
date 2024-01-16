@@ -232,6 +232,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Вы уже добавили рецепт в избранное'
             )
+        return data
 
     def representation(self, instance):
         return ShowFavoriteSerializer(instance.recipe, context={
