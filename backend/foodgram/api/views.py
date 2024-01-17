@@ -18,7 +18,6 @@ from recipes.models import (
     Tag,
 )
 from users.models import Subscription, User
-
 from .filters import IngredientsFilter, RecipeFilter
 from .pagination import CustomPagination
 from .permissions import IsAdminOrReadOnly
@@ -32,7 +31,7 @@ from .serializers import (
     SubscriptionSerializer,
     TagSerializer,
 )
-from utils import post_shortcut, delete_shortcut
+from .utils import post_shortcut, delete_shortcut
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
