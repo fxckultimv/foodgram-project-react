@@ -160,13 +160,13 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         ingredient_list = []
         for ingredient in ingredients:
             amount = ingredient['amount']
-            if int(amount) < 1:
+            if int(amount) < 1 or int(amount) < 0:
                 raise serializers.ValidationError({
-                    'amount': 'Количество не может быть нулевым.'
+                    'Минимальное количество ингредиента - 1.'
                 })
             if ingredient['id'] in ingredient_list:
                 raise serializers.ValidationError({
-                    'ingredient': 'Этот ингредиент уже есть.'
+                    'Ингредиенты в рецепте должны быть уникальны.'
                 })
             ingredient_list.append(ingredient['id'])
         return data
@@ -193,7 +193,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(author=author, **validated_data)
         self.create_ingredient(ingredients, recipe)
         self.create_tag(tags, recipe)
-
         return recipe
 
     def update(self, instance, validated_data):
@@ -204,7 +203,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         RecipeIngredients.objects.filter(recipe=instance).delete()
         self.create_ingredient(ingredients, instance)
         self.create_tag(tags, instance)
-
         return super().update(instance, validated_data)
 
     def representation(self, instance):
@@ -249,8 +247,9 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         if ShoppingCart.objects.filter(user=data['user'],
                                        recipe=data['recipe']).exists():
             raise serializers.ValidationError(
-                'Вы уже добавили рецепт в корзину'
+                'Вы уже добавили этот рецепт в корзину'
             )
+        return data
 
     def representation(self, instance):
         return ShowFavoriteSerializer(instance.recipe, context={

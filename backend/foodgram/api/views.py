@@ -47,7 +47,13 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [IngredientsFilter, ]
     serializer_class = IngredientSerializer
     pagination_class = None
-    search_filter = ['^name', ]
+
+    def get_queryset(self):
+        queryset = Ingredient.objects.all()
+        ingredients_name = self.request.query_params.get('name')
+        if ingredients_name is not None:
+            queryset = queryset.filter(name__istartswith=ingredients_name)
+        return queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -117,7 +123,7 @@ class FavoriteView(APIView):
 
     def post(self, request, id):
         return post_shortcut(self, request, id,
-                             Favorite, FavoriteSerializer)
+                             FavoriteSerializer)
 
     def delete(self, request, id):
         return delete_shortcut(self, request, id, Favorite)
@@ -128,7 +134,7 @@ class CartViewSet(APIView):
 
     def post(self, request, id):
         return post_shortcut(self, request, id,
-                             ShoppingCart, ShoppingCartSerializer)
+                             ShoppingCartSerializer)
 
     def delete(self, request, id):
         return delete_shortcut(self, request, id, ShoppingCart)
