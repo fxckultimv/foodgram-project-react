@@ -143,18 +143,18 @@ class IngredientsInRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-class IngredientInRecipeWriteSerializer(serializers.ModelSerializer):
+class AddIngredientRecipeSerilizer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
 
     class Meta:
-        model = IngredientAmount
+        model = RecipeIngredients
         fields = ('id', 'amount')
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
 
     author = CustomUserSerializer(read_only=True)
-    ingredients = IngredientInRecipeWriteSerializer(
+    ingredients = AddIngredientRecipeSerilizer(
         many=True
     )
     tags = serializers.PrimaryKeyRelatedField(
@@ -192,8 +192,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredient(self, ingredients, recipe):
-        IngredientAmount.objects.bulk_create([
-            IngredientAmount(
+        RecipeIngredients.objects.bulk_create([
+            RecipeIngredients(
                 ingredient=ingredient.get('id'),
                 recipe=recipe,
                 amount=ingredient.get('amount')
