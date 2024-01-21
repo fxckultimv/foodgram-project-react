@@ -11,6 +11,7 @@ from recipes.models import (
     RecipeTag,
     ShoppingCart,
     Tag,
+    IngredientAmount
 )
 from users.models import Subscription, User
 from api.utils import check_subscription
@@ -55,11 +56,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'color', 'slug']
 
 
-class IngredientSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Ingredient
-        fields = ['id', 'name', 'measurement_unit']
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -123,20 +120,43 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).exists()
 
 
-class AddIngredientRecipeSerializer(serializers.ModelSerializer):
-
-    id = serializers.IntegerField()
-    amount = serializers.IntegerField()
+class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = RecipeIngredients
-        fields = ['id', 'amount']
+        model = Ingredient
+        fields = ['id', 'name', 'measurement_unit']
+
+
+class IngredientsInRecipeSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(
+        source='ingredient.id',
+    )
+    name = serializers.ReadOnlyField(
+        source='ingredient.name',
+    )
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit',
+    )
+
+    class Meta:
+        model = IngredientAmount
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
+class IngredientInRecipeWriteSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+
+    class Meta:
+        model = IngredientAmount
+        fields = ('id', 'amount')
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
 
     author = CustomUserSerializer(read_only=True)
-    ingredients = AddIngredientRecipeSerializer(many=True)
+    ingredients = IngredientInRecipeWriteSerializer(
+        many=True
+    )
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
     )
@@ -172,13 +192,14 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredient(self, ingredients, recipe):
-        RecipeIngredients.objects.bulk_create(
-            [RecipeIngredients(
-                ingredient_id=ingredient['id'],
+        IngredientAmount.objects.bulk_create([
+            IngredientAmount(
+                ingredient=ingredient.get('id'),
                 recipe=recipe,
-                amount=ingredient['amount']
-            ) for ingredient in ingredients]
-        )
+                amount=ingredient.get('amount')
+            )
+            for ingredient in ingredients
+        ])
 
     def create_tag(self, tags, recipe):
         RecipeTag.objects.bulk_create(

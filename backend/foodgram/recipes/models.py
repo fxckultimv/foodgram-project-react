@@ -85,22 +85,60 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeIngredients(models.Model):
-
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
-                               verbose_name='Рецепт',
-                               related_name='ingredient_recipe')
-
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,
-                                   verbose_name='Ингредиент',
-                                   related_name='ingredient_recipe')
-
-    amount = models.IntegerField('Количество',
-                                 validators=[MinValueValidator(1)])
+class IngredientAmount(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe',
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='ingredient',
+    )
+    amount = models.PositiveIntegerField(
+        'Количество',
+        default=1,
+        validators=(MinValueValidator(1, 'Минимум 1'),),
+    )
 
     class Meta:
-        constraints = [UniqueConstraint(fields=['recipe', 'ingredient'],
-                                        name='recipe_ingredient_unique')]
+        ordering = ('id',)
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
+
+    def __str__(self):
+        return (f'В рецепте {self.recipe.name} {self.amount} '
+                f'{self.ingredient.measurement_unit} {self.ingredient.name}')
+
+
+class RecipeIngredients(models.Model):
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ingredient_amounts',
+        verbose_name='Рецепт',
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name='Ингредиент',
+    )
+    amount = models.PositiveSmallIntegerField(
+        default=1,
+        validators=(MinValueValidator(
+            1, message='Мин. количество ингридиентов 1'),),
+        verbose_name='Количество',
+    )
+
+    class Meta:
+        ordering = ['recipe']
+        verbose_name = 'ингредиенты'
+        verbose_name_plural = 'Ингредиенты'
+
+    def __str__(self):
+        return f'В рецепте {self.recipe} есть ингредиент {self.ingredient}'
 
 
 class RecipeTag(models.Model):
